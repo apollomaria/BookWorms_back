@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { DatabaseModule } from './database/database.module';
 
+// Módulo raiz: junta as peças da aplicação. ConfigModule lê o arquivo .env e
+// disponibiliza as variáveis (DB_HOST, DB_PORT...) via ConfigService.
 @Module({
   imports: [
     ConfigModule.forRoot({
