@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -25,10 +25,16 @@ export class UsersController {
   // O Nest responde 201 (Created) por padrão em POST quando não há exceção.
   // Se o service lançar uma exceção (ex.: ConflictException), o Nest a converte
   // automaticamente em resposta HTTP (ex.: 409).
-  @Post()
+  @Post('cadastro')
   cadastrar(@Body() dados: CreateUserDto) {
     return this.usersService.cadastrar(dados);
   }
 
-  
+  // GET /users/:id  -> RF 002: consultar as informações da própria conta.
+  // Fica DEPOIS de 'teste-conexao' para o Nest não confundir os dois caminhos.
+  // ParseIntPipe converte o :id (texto da URL) em número e responde 400 se não for.
+  @Get(':id')
+  consultar(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.consultar(id);
+  }
 }

@@ -34,7 +34,7 @@ class BancoFalso {
   }
 }
 
-describe('POST /users (UC001)', () => {
+describe('POST /users/cadastro (UC001)', () => {
   let app: INestApplication<App>;
   let banco: BancoFalso;
   const corpo = {
@@ -60,7 +60,7 @@ describe('POST /users (UC001)', () => {
     await app.close();
   });
 
-  const post = (b: object) => request(app.getHttpServer()).post('/users').send(b);
+  const post = (b: object) => request(app.getHttpServer()).post('/users/cadastro').send(b);
 
   it('201 e resposta sem senha/hash', async () => {
     const res = await post(corpo).expect(201);
