@@ -13,6 +13,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../database/database.service';
@@ -157,6 +158,28 @@ export class UsersService {
       // (Internal Server Error) sem expor detalhes ao cliente.
       throw erro;
     }
+  }
+
+  /**
+   * RF 002 – consulta os dados cadastrais de uma conta ativa.
+   * Mostra nome, e-mail, data de nascimento, nível e EXP (o documento também cita
+   * "apelido", mas a tabela usuarios só tem nome_usuario; ver pendências).
+   */
+  async consultar(id: number) {
+    const resultado = await this.databaseService.query(
+      `SELECT id, nome_usuario, email,
+              to_char(data_nascimento, 'YYYY-MM-DD') AS data_nascimento,
+              nivel, exp, criado_em
+         FROM usuarios
+        WHERE id = $1 AND ativo = true`,
+      [id],
+    );
+
+    if (resultado.rows.length === 0) {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
+    return { usuario: resultado.rows[0] };
   }
 
   private ehViolacaoDeUnicidade(erro: unknown): boolean {

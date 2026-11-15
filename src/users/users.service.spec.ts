@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../database/database.service';
@@ -146,6 +146,23 @@ describe('UsersService.cadastrar (UC001)', () => {
       const erro = { code: '08006', message: 'conexão perdida' };
       query.mockResolvedValueOnce({ rows: [] }).mockRejectedValueOnce(erro);
       await expect(service.cadastrar(dadosValidos(), hoje)).rejects.toBe(erro);
+    });
+  });
+
+  describe('consultar (RF 002)', () => {
+    it('devolve os dados da conta ativa, sem senha', async () => {
+      query.mockResolvedValueOnce({
+        rows: [{ id: 1, nome_usuario: 'a', email: 'a@a.com', data_nascimento: '2000-01-01', nivel: 1, exp: 0, criado_em: 'x' }],
+      });
+      const r = await service.consultar(1);
+      expect(r.usuario.nome_usuario).toBe('a');
+      expect(JSON.stringify(r)).not.toMatch(/senha|hash/i);
+      expect(query.mock.calls[0][1]).toEqual([1]);
+    });
+
+    it('404 quando a conta não existe ou está desativada', async () => {
+      query.mockResolvedValueOnce({ rows: [] });
+      await expect(service.consultar(9)).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });
